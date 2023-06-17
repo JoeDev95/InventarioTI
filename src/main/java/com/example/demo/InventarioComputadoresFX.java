@@ -9,17 +9,28 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
+import java.sql.*;
+
 public class InventarioComputadoresFX extends Application {
+    private static final String DATABASE_URL = "jdbc:sqlite:C:\\Users\\Joelson\\Documents\\inventario.db";
+    private Connection connection;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Inventário de Computadores");
+
+        createConnection();
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(20));
         gridPane.setHgap(10);
         gridPane.setVgap(10);
 
-        // Criar o ImageView para a logo
+        // ImageView para a logo
         Image logoImage = new Image(getClass().getResourceAsStream("/logo.png"));
         ImageView logoImageView = new ImageView(logoImage);
         gridPane.add(logoImageView, 0, 0, 2, 1);
@@ -78,18 +89,28 @@ public class InventarioComputadoresFX extends Application {
         gridPane.add(salvarButton, 1, 11);
 
         salvarButton.setOnAction(event -> {
-            int id = Integer.parseInt(idTextField.getText());
+            int id;
+            try {
+                id = Integer.parseInt(idTextField.getText());
+            } catch (NumberFormatException e) {
+                // Tratar o caso em que o valor não é um número válido
+                // Por exemplo, exibir uma mensagem de erro ao usuário
+                System.out.println("O valor do ID não é um número válido");
+                return; // ou qualquer outra ação adequada ao seu caso
+            }
+
             String setor = setorTextField.getText();
             String descricao = descricaoTextField.getText();
             boolean garantia = garantiaCheckBox.isSelected();
             String validadeGarantia = garantia ? validadeDatePicker.getValue().toString() : null;
-            String dataCompra = dataCompraDatePicker.getValue().toString();
+            String dataCompra = dataCompraDatePicker.getValue() != null ? dataCompraDatePicker.getValue().toString() : null;
             String fabricante = fabricanteTextField.getText();
             double valor = Double.parseDouble(valorTextField.getText());
             String condicoes = condicoesTextArea.getText();
             String observacao = observacaoTextArea.getText();
 
-            // Agora você pode usar os dados inseridos para fazer o que for necessário, como salvar em um banco de dados
+            insertComputer(id, setor, descricao, garantia, validadeGarantia, dataCompra,
+                    fabricante, valor, condicoes, observacao);
 
             // Exemplo de exibição dos dados recebidos
             System.out.println("Dados inseridos:");
@@ -109,11 +130,62 @@ public class InventarioComputadoresFX extends Application {
 
         Scene scene = new Scene(gridPane);
         primaryStage.setScene(scene);
-        primaryStage.setResizable(true); // Permite redimensionamento da janela
+        primaryStage.setResizable(true); // Permite redimensionamento da janela mais a esquerda
         primaryStage.show();
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    private void createConnection() {
+        try {
+            connection = DriverManager.getConnection(DATABASE_URL);
+            createTable();
+        } catch (SQLException e) {
+            System.out.println("Erro ao conectar ao banco de dados: " + e.getMessage());
+        }
+    }
+
+    private void createTable() {
+        String sql = "CREATE TABLE IF NOT EXISTS computers (" +
+                "id INTEGER PRIMARY KEY," +
+                "setor TEXT," +
+                "descricao TEXT," +
+                "garantia BOOLEAN," +
+                "validade_garantia TEXT," +
+                "data_compra TEXT," +
+                "fabricante TEXT," +
+                "valor REAL," +
+                "condicoes TEXT," +
+                "observacao TEXT" +
+                ")";
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        } catch (SQLException e) {
+            System.out.println("Erro ao criar a tabela no banco de dados: " + e.getMessage());
+        }
+    }
+
+    private void insertComputer(int id, String setor, String descricao, boolean garantia, String validadeGarantia,
+                                String dataCompra, String fabricante, double valor, String condicoes,
+                                String observacao) {
+        String sql = "INSERT INTO computers (id, setor, descricao, garantia, validade_garantia, " +
+                "data_compra, fabricante, valor, condicoes, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, id);
+            statement.setString(2, setor);
+            statement.setString(3, descricao);
+            statement.setBoolean(4, garantia);
+            statement.setString(5, validadeGarantia);
+            statement.setString(6, dataCompra);
+            statement.setString(7, fabricante);
+            statement.setDouble(8, valor);
+            statement.setString(9, condicoes);
+            statement.setString(10, observacao);
+
+            statement.executeUpdate();
+            System.out.println("Computador inserido com sucesso no banco de dados.");
+        } catch (SQLException e) {
+            System.out.println("Erro ao inserir o computador no banco de dados: " + e.getMessage());
+        }
     }
 }
