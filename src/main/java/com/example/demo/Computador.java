@@ -1,6 +1,9 @@
 package com.example.demo;
 
 public class Computador {
+    public Computador(int id, String setor, String descricao, boolean garantia, String validadeGarantia, String dataCompra, String fabricante, double valor, String condicoes, String observacao) {
+    }
+
     public String getSetor() {
         return null;
     }
