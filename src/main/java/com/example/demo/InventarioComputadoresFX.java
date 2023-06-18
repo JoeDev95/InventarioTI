@@ -116,6 +116,7 @@ public class InventarioComputadoresFX extends Application {
             System.out.println("Dados inseridos:");
             System.out.println("ID: " + id);
             System.out.println("Setor: " + setor);
+
             System.out.println("Descrição: " + descricao);
             System.out.println("Garantia: " + garantia);
             if (garantia) {
@@ -126,6 +127,12 @@ public class InventarioComputadoresFX extends Application {
             System.out.println("Valor: " + valor);
             System.out.println("Condições: " + condicoes);
             System.out.println("Observação: " + observacao);
+        });
+        Button listarButton = new Button("Listar Computadores");
+        gridPane.add(listarButton, 1, 12);
+
+        listarButton.setOnAction(event -> {
+            listComputers();
         });
 
         Scene scene = new Scene(gridPane);
@@ -186,6 +193,46 @@ public class InventarioComputadoresFX extends Application {
             System.out.println("Computador inserido com sucesso no banco de dados.");
         } catch (SQLException e) {
             System.out.println("Erro ao inserir o computador no banco de dados: " + e.getMessage());
+        }
+    }
+
+    private void listComputers() {
+        String sql = "SELECT * FROM computers";
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            System.out.println("Lista de Computadores:");
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String setor = resultSet.getString("setor");
+                String descricao = resultSet.getString("descricao");
+                boolean garantia = resultSet.getBoolean("garantia");
+                String validadeGarantia = resultSet.getString("validade_garantia");
+                String dataCompra = resultSet.getString("data_compra");
+                String fabricante = resultSet.getString("fabricante");
+                double valor = resultSet.getDouble("valor");
+                String condicoes = resultSet.getString("condicoes");
+                String observacao = resultSet.getString("observacao");
+
+                // Exemplo de exibição dos dados
+                System.out.println("ID: " + id);
+                System.out.println("Setor: " + setor);
+                System.out.println("Descrição: " + descricao);
+                System.out.println("Garantia: " + garantia);
+                if (garantia) {
+                    System.out.println("Validade da Garantia: " + validadeGarantia);
+                }
+                System.out.println("Data da Compra: " + dataCompra);
+                System.out.println("Fabricante: " + fabricante);
+                System.out.println("Valor: " + valor);
+                System.out.println("Condições: " + condicoes);
+                System.out.println("Observação: " + observacao);
+                System.out.println();
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar os computadores: " + e.getMessage());
         }
     }
 }
