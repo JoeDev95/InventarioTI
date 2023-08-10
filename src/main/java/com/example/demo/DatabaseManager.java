@@ -6,8 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+
+
 public class DatabaseManager {
-    private static final String DATABASE_URL = "jdbc:sqlite:C:\\Users\\Joelson\\Documents\\inventario.db";
+    private static final String DATABASE_URL = "jdbc:sqlite:/home/joe/inventario.db";
+
+
     private Connection connection;
 
     public DatabaseManager() {
@@ -18,18 +22,20 @@ public class DatabaseManager {
         }
     }
 
-    public void createTable() {
+    private void createTable() {
         String sql = "CREATE TABLE IF NOT EXISTS computers (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "id INTEGER PRIMARY KEY," +
                 "setor TEXT," +
                 "descricao TEXT," +
-                "garantia INTEGER," +
+                "garantia BOOLEAN," +
                 "validade_garantia TEXT," +
                 "data_compra TEXT," +
                 "fabricante TEXT," +
                 "valor REAL," +
                 "condicoes TEXT," +
-                "observacao TEXT" +
+                "observacao TEXT," +
+                "ultima_manutencao TEXT," +
+                "previsao_proxima_manutencao TEXT" +
                 ")";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -40,8 +46,9 @@ public class DatabaseManager {
     }
 
     public void insertComputador(Computador computador) {
-        String sql = "INSERT INTO computers (setor, descricao, garantia, validade_garantia, " +
-                "data_compra, fabricante, valor, condicoes, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO computers (id, setor, descricao, garantia, validade_garantia, data_compra, " +
+                "fabricante, valor, condicoes, observacao, ultima_manutencao, previsao_proxima_manutencao) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, computador.getSetor());

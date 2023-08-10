@@ -11,8 +11,10 @@ import javafx.stage.Stage;
 
 import java.sql.*;
 
-public class InventarioComputadoresFX extends Application {
-    private static final String DATABASE_URL = "jdbc:sqlite:C:\\Users\\Joelson\\Documents\\inventario.db";
+public class InventarioComputadoresFX<Categoria> extends Application {
+    private static final String DATABASE_URL = "jdbc:sqlite:/home/joe/inventario.db";
+
+
     private Connection connection;
 
     public static void main(String[] args) {
@@ -21,7 +23,7 @@ public class InventarioComputadoresFX extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Inventário de Computadores");
+        primaryStage.setTitle("Inventário de maquinas");
 
         createConnection();
 
@@ -65,7 +67,7 @@ public class InventarioComputadoresFX extends Application {
         gridPane.add(dataCompraLabel, 0, 6);
         gridPane.add(dataCompraDatePicker, 1, 6);
 
-        Label fabricanteLabel = new Label("Fabricante:");
+        Label fabricanteLabel = new Label("Filial de origem:");
         TextField fabricanteTextField = new TextField();
         gridPane.add(fabricanteLabel, 0, 7);
         gridPane.add(fabricanteTextField, 1, 7);
@@ -85,8 +87,21 @@ public class InventarioComputadoresFX extends Application {
         gridPane.add(observacaoLabel, 0, 10);
         gridPane.add(observacaoTextArea, 1, 10);
 
+
+        Label ultimaManutencaoLabel = new Label("Última Manutenção:");
+        DatePicker ultimaManutencaoDatePicker = new DatePicker();
+        gridPane.add(ultimaManutencaoLabel, 0, 11);
+        gridPane.add(ultimaManutencaoDatePicker, 1, 11);
+
+        Label previsaoProximaManutencaoLabel = new Label("Próxima Manutenção:");
+        DatePicker previsaoProximaManutencaoDatePicker = new DatePicker();
+        gridPane.add(previsaoProximaManutencaoLabel, 0, 12);
+        gridPane.add(previsaoProximaManutencaoDatePicker, 1, 12);
+
+
         Button salvarButton = new Button("Salvar");
-        gridPane.add(salvarButton, 1, 11);
+        gridPane.add(salvarButton, 1, 13);
+
 
         salvarButton.setOnAction(event -> {
             int id;
@@ -109,8 +124,16 @@ public class InventarioComputadoresFX extends Application {
             String condicoes = condicoesTextArea.getText();
             String observacao = observacaoTextArea.getText();
 
+            String ultimaManutencao = ultimaManutencaoDatePicker.getValue() != null
+                    ? ultimaManutencaoDatePicker.getValue().toString()
+                    : null;
+            String previsaoProximaManutencao = previsaoProximaManutencaoDatePicker.getValue() != null
+                    ? previsaoProximaManutencaoDatePicker.getValue().toString()
+                    : null;
+
             insertComputer(id, setor, descricao, garantia, validadeGarantia, dataCompra,
-                    fabricante, valor, condicoes, observacao);
+                    fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
+
 
             // Exemplo de exibição dos dados recebidos
             System.out.println("Dados inseridos:");
@@ -127,13 +150,16 @@ public class InventarioComputadoresFX extends Application {
             System.out.println("Valor: " + valor);
             System.out.println("Condições: " + condicoes);
             System.out.println("Observação: " + observacao);
+            System.out.println("Última manuntenção: " + ultimaManutencao);
+            System.out.println("Próxima manuntenção: " + previsaoProximaManutencao);
+
         });
 
         Button listarButton = new Button("Listar Computadores");
-        gridPane.add(listarButton, 1, 12);
+        gridPane.add(listarButton, 1, 15);
 
         listarButton.setOnAction(event -> {
-            ListaComputadoresWindow listaComputadoresWindow = new ListaComputadoresWindow();
+            ListaComputadoresFX listaComputadoresWindow = new ListaComputadoresFX();
             try {
                 listaComputadoresWindow.exibirListaComputadores(connection.createStatement());
             } catch (SQLException e) {
@@ -167,7 +193,9 @@ public class InventarioComputadoresFX extends Application {
                 "fabricante TEXT," +
                 "valor REAL," +
                 "condicoes TEXT," +
-                "observacao TEXT" +
+                "observacao TEXT," +
+                "ultima_manutencao TEXT," +
+                "previsao_proxima_manutencao TEXT" +
                 ")";
 
         try (Statement statement = connection.createStatement()) {
@@ -179,9 +207,10 @@ public class InventarioComputadoresFX extends Application {
 
     private void insertComputer(int id, String setor, String descricao, boolean garantia, String validadeGarantia,
                                 String dataCompra, String fabricante, double valor, String condicoes,
-                                String observacao) {
+                                String observacao, String ultimaManutencao, String previsaoProximaManutencao) {
         String sql = "INSERT INTO computers (id, setor, descricao, garantia, validade_garantia, data_compra, " +
-                "fabricante, valor, condicoes, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "fabricante, valor, condicoes, observacao, ultima_manutencao, previsao_proxima_manutencao) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
@@ -194,6 +223,8 @@ public class InventarioComputadoresFX extends Application {
             statement.setDouble(8, valor);
             statement.setString(9, condicoes);
             statement.setString(10, observacao);
+            statement.setString(11, ultimaManutencao);
+            statement.setString(12, previsaoProximaManutencao);
 
             statement.executeUpdate();
             System.out.println("Dados inseridos com sucesso.");

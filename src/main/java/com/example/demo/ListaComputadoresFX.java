@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ListaComputadoresFX extends Application {
     private DatabaseManager databaseManager;
@@ -62,7 +63,7 @@ public class ListaComputadoresFX extends Application {
 
         ObservableList<Computador> computadores = FXCollections.observableArrayList();
 
-        ResultSet resultSet = databaseManager.getAllComputadores();
+        ResultSet resultSet = (ResultSet) (ResultSet) databaseManager.getAllComputadores();
         if (resultSet != null) {
             try {
                 while (resultSet.next()) {
@@ -98,5 +99,8 @@ public class ListaComputadoresFX extends Application {
     @Override
     public void stop() {
         databaseManager.closeConnection();
+    }
+
+    public void exibirListaComputadores(Statement statement) {
     }
 }
