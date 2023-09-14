@@ -7,13 +7,15 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.sql.*;
+import java.time.LocalDate;
 
-public class InventarioComputadoresFX<Categoria> extends Application {
-    private static final String DATABASE_URL = "jdbc:sqlite:/home/joe/inventario.db";
-
+public class InventarioComputadoresFX extends Application {
+    private static final String DATABASE_URL = "jdbc:postgresql://localhost:5432/postgres?user=postgres&password=123";
 
     private Connection connection;
 
@@ -23,160 +25,65 @@ public class InventarioComputadoresFX<Categoria> extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Inventário de maquinas");
+        primaryStage.setTitle("Inventário de máquinas");
 
         createConnection();
 
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(20));
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(20));
 
         // ImageView para a logo
         Image logoImage = new Image(getClass().getResourceAsStream("/logo.png"));
         ImageView logoImageView = new ImageView(logoImage);
-        gridPane.add(logoImageView, 0, 0, 2, 1);
+        vbox.getChildren().add(logoImageView);
 
-        Label idLabel = new Label("ID:");
-        TextField idTextField = new TextField();
-        gridPane.add(idLabel, 0, 1);
-        gridPane.add(idTextField, 1, 1);
+        // Criação de controles para coleta de informações sobre o computador
+        vbox.getChildren().addAll(createComputerForm());
 
-        Label setorLabel = new Label("Setor:");
-        TextField setorTextField = new TextField();
-        gridPane.add(setorLabel, 0, 2);
-        gridPane.add(setorTextField, 1, 2);
-
-        Label descricaoLabel = new Label("Descrição:");
-        TextField descricaoTextField = new TextField();
-        gridPane.add(descricaoLabel, 0, 3);
-        gridPane.add(descricaoTextField, 1, 3);
-
-        Label garantiaLabel = new Label("Garantia:");
-        CheckBox garantiaCheckBox = new CheckBox();
-        gridPane.add(garantiaLabel, 0, 4);
-        gridPane.add(garantiaCheckBox, 1, 4);
-
-        Label validadeLabel = new Label("Validade da Garantia:");
-        DatePicker validadeDatePicker = new DatePicker();
-        gridPane.add(validadeLabel, 0, 5);
-        gridPane.add(validadeDatePicker, 1, 5);
-
-        Label dataCompraLabel = new Label("Data da Compra:");
-        DatePicker dataCompraDatePicker = new DatePicker();
-        gridPane.add(dataCompraLabel, 0, 6);
-        gridPane.add(dataCompraDatePicker, 1, 6);
-
-        Label fabricanteLabel = new Label("Filial de origem:");
-        TextField fabricanteTextField = new TextField();
-        gridPane.add(fabricanteLabel, 0, 7);
-        gridPane.add(fabricanteTextField, 1, 7);
-
-        Label valorLabel = new Label("Valor:");
-        TextField valorTextField = new TextField();
-        gridPane.add(valorLabel, 0, 8);
-        gridPane.add(valorTextField, 1, 8);
-
-        Label condicoesLabel = new Label("Condições:");
-        TextArea condicoesTextArea = new TextArea();
-        gridPane.add(condicoesLabel, 0, 9);
-        gridPane.add(condicoesTextArea, 1, 9);
-
-        Label observacaoLabel = new Label("Observação:");
-        TextArea observacaoTextArea = new TextArea();
-        gridPane.add(observacaoLabel, 0, 10);
-        gridPane.add(observacaoTextArea, 1, 10);
-
-
-        Label ultimaManutencaoLabel = new Label("Última Manutenção:");
-        DatePicker ultimaManutencaoDatePicker = new DatePicker();
-        gridPane.add(ultimaManutencaoLabel, 0, 11);
-        gridPane.add(ultimaManutencaoDatePicker, 1, 11);
-
-        Label previsaoProximaManutencaoLabel = new Label("Próxima Manutenção:");
-        DatePicker previsaoProximaManutencaoDatePicker = new DatePicker();
-        gridPane.add(previsaoProximaManutencaoLabel, 0, 12);
-        gridPane.add(previsaoProximaManutencaoDatePicker, 1, 12);
-
+        // Botões para Salvar e Listar
+        HBox buttonsBox = new HBox(10);
+        buttonsBox.setPadding(new Insets(10, 0, 0, 0));
 
         Button salvarButton = new Button("Salvar");
-        gridPane.add(salvarButton, 1, 13);
+        Button listarButton = new Button("Listar Computadores");
 
+        buttonsBox.getChildren().addAll(salvarButton, listarButton);
+
+        vbox.getChildren().add(buttonsBox);
 
         salvarButton.setOnAction(event -> {
-            int id;
-            try {
-                id = Integer.parseInt(idTextField.getText());
-            } catch (NumberFormatException e) {
-                // Tratar o caso em que o valor não é um número válido
-                // Por exemplo, exibir uma mensagem de erro ao usuário
-                System.out.println("O valor do ID não é um número válido");
-                return; // ou qualquer outra ação adequada ao seu caso
+            Computer computer = getComputerFromForm();
+            if (computer != null) {
+                insertComputer(computer);
+                clearFormFields();
             }
-
-            String setor = setorTextField.getText();
-            String descricao = descricaoTextField.getText();
-            boolean garantia = garantiaCheckBox.isSelected();
-            String validadeGarantia = garantia ? validadeDatePicker.getValue().toString() : null;
-            String dataCompra = dataCompraDatePicker.getValue() != null ? dataCompraDatePicker.getValue().toString() : null;
-            String fabricante = fabricanteTextField.getText();
-            double valor = Double.parseDouble(valorTextField.getText());
-            String condicoes = condicoesTextArea.getText();
-            String observacao = observacaoTextArea.getText();
-
-            String ultimaManutencao = ultimaManutencaoDatePicker.getValue() != null
-                    ? ultimaManutencaoDatePicker.getValue().toString()
-                    : null;
-            String previsaoProximaManutencao = previsaoProximaManutencaoDatePicker.getValue() != null
-                    ? previsaoProximaManutencaoDatePicker.getValue().toString()
-                    : null;
-
-            insertComputer(id, setor, descricao, garantia, validadeGarantia, dataCompra,
-                    fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
-
-
-            // Exemplo de exibição dos dados recebidos
-            System.out.println("Dados inseridos:");
-            System.out.println("ID: " + id);
-            System.out.println("Setor: " + setor);
-
-            System.out.println("Descrição: " + descricao);
-            System.out.println("Garantia: " + garantia);
-            if (garantia) {
-                System.out.println("Validade da Garantia: " + validadeGarantia);
-            }
-            System.out.println("Data da Compra: " + dataCompra);
-            System.out.println("Fabricante: " + fabricante);
-            System.out.println("Valor: " + valor);
-            System.out.println("Condições: " + condicoes);
-            System.out.println("Observação: " + observacao);
-            System.out.println("Última manuntenção: " + ultimaManutencao);
-            System.out.println("Próxima manuntenção: " + previsaoProximaManutencao);
-
         });
-
-        Button listarButton = new Button("Listar Computadores");
-        gridPane.add(listarButton, 1, 15);
 
         listarButton.setOnAction(event -> {
             ListaComputadoresFX listaComputadoresWindow = new ListaComputadoresFX();
             try {
                 listaComputadoresWindow.exibirListaComputadores(connection.createStatement());
+                listaComputadoresWindow.show();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         });
 
-        Scene scene = new Scene(gridPane);
+        Scene scene = new Scene(vbox);
         primaryStage.setScene(scene);
-        primaryStage.setResizable(true); // Permite redimensionamento da janela mais à esquerda
+        primaryStage.setResizable(true);
         primaryStage.show();
     }
 
     private void createConnection() {
         try {
             connection = DriverManager.getConnection(DATABASE_URL);
-            createTable();
+            if (connection != null) {
+                System.out.println("Conexão com o banco de dados estabelecida com sucesso.");
+                createTable();
+            } else {
+                System.out.println("A conexão com o banco de dados não pôde ser estabelecida.");
+            }
         } catch (SQLException e) {
             System.out.println("Erro ao conectar ao banco de dados: " + e.getMessage());
         }
@@ -184,52 +91,139 @@ public class InventarioComputadoresFX<Categoria> extends Application {
 
     private void createTable() {
         String sql = "CREATE TABLE IF NOT EXISTS computers (" +
-                "id INTEGER PRIMARY KEY," +
+                "id SERIAL PRIMARY KEY," +
                 "setor TEXT," +
                 "descricao TEXT," +
                 "garantia BOOLEAN," +
-                "validade_garantia TEXT," +
-                "data_compra TEXT," +
+                "validade_garantia DATE," +
+                "data_compra DATE," +
                 "fabricante TEXT," +
                 "valor REAL," +
                 "condicoes TEXT," +
                 "observacao TEXT," +
-                "ultima_manutencao TEXT," +
-                "previsao_proxima_manutencao TEXT" +
+                "ultima_manutencao DATE," +
+                "previsao_proxima_manutencao DATE" +
                 ")";
 
-        try (Statement statement = connection.createStatement()) {
-            statement.execute(sql);
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Erro ao criar a tabela no banco de dados: " + e.getMessage());
+            System.out.println("Erro ao criar a tabela: " + e.getMessage());
         }
     }
 
-    private void insertComputer(int id, String setor, String descricao, boolean garantia, String validadeGarantia,
-                                String dataCompra, String fabricante, double valor, String condicoes,
-                                String observacao, String ultimaManutencao, String previsaoProximaManutencao) {
-        String sql = "INSERT INTO computers (id, setor, descricao, garantia, validade_garantia, data_compra, " +
-                "fabricante, valor, condicoes, observacao, ultima_manutencao, previsao_proxima_manutencao) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private GridPane createComputerForm() {
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(5);
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            statement.setString(2, setor);
-            statement.setString(3, descricao);
-            statement.setBoolean(4, garantia);
-            statement.setString(5, validadeGarantia);
-            statement.setString(6, dataCompra);
-            statement.setString(7, fabricante);
-            statement.setDouble(8, valor);
-            statement.setString(9, condicoes);
-            statement.setString(10, observacao);
-            statement.setString(11, ultimaManutencao);
-            statement.setString(12, previsaoProximaManutencao);
+        Label idLabel = new Label("ID:");
+        TextField idTextField = new TextField();
+        idTextField.setDisable(true);
+        gridPane.addRow(0, idLabel, idTextField);
 
-            statement.executeUpdate();
-            System.out.println("Dados inseridos com sucesso.");
+        Label setorLabel = new Label("Setor:");
+        TextField setorTextField = new TextField();
+        gridPane.addRow(1, setorLabel, setorTextField);
+
+        Label descricaoLabel = new Label("Descrição:");
+        TextField descricaoTextField = new TextField();
+        gridPane.addRow(2, descricaoLabel, descricaoTextField);
+
+        Label garantiaLabel = new Label("Garantia:");
+        CheckBox garantiaCheckBox = new CheckBox();
+        gridPane.addRow(3, garantiaLabel, garantiaCheckBox);
+
+        Label validadeLabel = new Label("Validade da Garantia:");
+        DatePicker validadeDatePicker = new DatePicker();
+        gridPane.addRow(4, validadeLabel, validadeDatePicker);
+
+        Label dataCompraLabel = new Label("Data da Compra:");
+        DatePicker dataCompraDatePicker = new DatePicker();
+        gridPane.addRow(5, dataCompraLabel, dataCompraDatePicker);
+
+        Label fabricanteLabel = new Label("Filial de Origem:");
+        ChoiceBox<String> fabricanteChoiceBox = new ChoiceBox<>();
+        fabricanteChoiceBox.getItems().addAll("Filial 1", "Filial 2", "Filial 3", "Filial 4", "Filial 5");
+        fabricanteChoiceBox.setValue("Filial 1");
+        gridPane.addRow(6, fabricanteLabel, fabricanteChoiceBox);
+
+        Label valorLabel = new Label("Valor:");
+        TextField valorTextField = new TextField();
+        gridPane.addRow(7, valorLabel, valorTextField);
+
+        Label condicoesLabel = new Label("Condições:");
+        TextArea condicoesTextArea = new TextArea();
+        gridPane.addRow(8, condicoesLabel, condicoesTextArea);
+
+        Label observacaoLabel = new Label("Observação:");
+        TextArea observacaoTextArea = new TextArea();
+        gridPane.addRow(9, observacaoLabel, observacaoTextArea);
+
+        Label ultimaManutencaoLabel = new Label("Última Manutenção:");
+        DatePicker ultimaManutencaoDatePicker = new DatePicker();
+        gridPane.addRow(10, ultimaManutencaoLabel, ultimaManutencaoDatePicker);
+
+        Label previsaoProximaManutencaoLabel = new Label("Próxima Manutenção:");
+        DatePicker previsaoProximaManutencaoDatePicker = new DatePicker();
+        gridPane.addRow(11, previsaoProximaManutencaoLabel, previsaoProximaManutencaoDatePicker);
+
+        return gridPane;
+    }
+
+    private Computer getComputerFromForm() {
+        try {
+            int id = 0;
+            String setor = "";
+            String descricao = "";
+            boolean garantia = false;
+            LocalDate validadeGarantia = null;
+            String fabricante = "";
+            double valor = 0;
+            String condicoes = "";
+            String observacao = "";
+            LocalDate ultimaManutencao = null;
+            LocalDate previsaoProximaManutencao = null;
+
+            // Obter valores dos campos do formulário
+            // Você deve adicionar a lógica para obter os valores corretamente dos campos
+
+            return new Computer(id, setor, descricao, garantia, validadeGarantia, fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
+        } catch (Exception e) {
+            System.out.println("Erro ao obter os dados do formulário: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void clearFormFields() {
+        // Limpar os campos do formulário após a inserção bem-sucedida
+    }
+
+    private void insertComputer(Computer computer) {
+        String sql = "INSERT INTO computers (setor, descricao, garantia, validade_garantia, data_compra, fabricante, valor, condicoes, observacao, ultima_manutencao, previsao_proxima_manutencao) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, computer.getSetor());
+            statement.setString(2, computer.getDescricao());
+            statement.setBoolean(3, computer.isGarantia());
+            statement.setString(6, computer.getFabricante());
+            statement.setDouble(7, computer.getValor());
+            statement.setString(8, computer.getCondicoes());
+            statement.setString(9, computer.getObservacao());
+            statement.setObject(10, computer.getUltimaManutencao());
+            statement.setObject(11, computer.getPrevisaoProximaManutencao());
+
+            int rowsInserted = statement.executeUpdate();
+            if (rowsInserted > 0) {
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    int generatedId = generatedKeys.getInt(1);
+                    System.out.println("Computador inserido com sucesso. ID gerado: " + generatedId);
+                }
+            }
         } catch (SQLException e) {
-            System.out.println("Erro ao inserir os dados no banco de dados: " + e.getMessage());
+            System.out.println("Erro ao inserir o computador no banco de dados: " + e.getMessage());
         }
     }
 }

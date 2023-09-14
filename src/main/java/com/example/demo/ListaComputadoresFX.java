@@ -8,10 +8,11 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class ListaComputadoresFX extends Application {
     private DatabaseManager databaseManager;
@@ -26,44 +27,47 @@ public class ListaComputadoresFX extends Application {
 
         databaseManager = new DatabaseManager();
 
-        TableView<Computador> table = new TableView<>();
+        TableView<Computer> table = new TableView<>();
 
-        TableColumn<Computador, Integer> idColumn = new TableColumn<>("ID");
+        TableColumn<Computer, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        TableColumn<Computador, String> setorColumn = new TableColumn<>("Setor");
+        TableColumn<Computer, String> setorColumn = new TableColumn<>("Setor");
         setorColumn.setCellValueFactory(new PropertyValueFactory<>("setor"));
 
-        TableColumn<Computador, String> descricaoColumn = new TableColumn<>("Descrição");
+        TableColumn<Computer, String> descricaoColumn = new TableColumn<>("Descrição");
         descricaoColumn.setCellValueFactory(new PropertyValueFactory<>("descricao"));
 
-        TableColumn<Computador, Boolean> garantiaColumn = new TableColumn<>("Garantia");
+        TableColumn<Computer, Boolean> garantiaColumn = new TableColumn<>("Garantia");
         garantiaColumn.setCellValueFactory(new PropertyValueFactory<>("garantia"));
 
-        TableColumn<Computador, String> validadeGarantiaColumn = new TableColumn<>("Validade da Garantia");
+        TableColumn<Computer, LocalDate> validadeGarantiaColumn = new TableColumn<>("Validade da Garantia");
         validadeGarantiaColumn.setCellValueFactory(new PropertyValueFactory<>("validadeGarantia"));
 
-        TableColumn<Computador, String> dataCompraColumn = new TableColumn<>("Data da Compra");
-        dataCompraColumn.setCellValueFactory(new PropertyValueFactory<>("dataCompra"));
+        validadeGarantiaColumn.setCellFactory(column -> {
+            TableCell<Computer, LocalDate> cell = new TableCell<Computer, LocalDate>() {
+                private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        TableColumn<Computador, String> fabricanteColumn = new TableColumn<>("Fabricante");
-        fabricanteColumn.setCellValueFactory(new PropertyValueFactory<>("fabricante"));
+                @Override
+                protected void updateItem(LocalDate item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(formatter.format(item));
+                    }
+                }
+            };
+            return cell;
+        });
 
-        TableColumn<Computador, Double> valorColumn = new TableColumn<>("Valor");
-        valorColumn.setCellValueFactory(new PropertyValueFactory<>("valor"));
+        // Outras colunas...
 
-        TableColumn<Computador, String> condicoesColumn = new TableColumn<>("Condições");
-        condicoesColumn.setCellValueFactory(new PropertyValueFactory<>("condicoes"));
+        table.getColumns().addAll(idColumn, setorColumn, descricaoColumn, garantiaColumn, validadeGarantiaColumn);
 
-        TableColumn<Computador, String> observacaoColumn = new TableColumn<>("Observação");
-        observacaoColumn.setCellValueFactory(new PropertyValueFactory<>("observacao"));
+        ObservableList<Computer> computadores = FXCollections.observableArrayList();
 
-        table.getColumns().addAll(idColumn, setorColumn, descricaoColumn, garantiaColumn, validadeGarantiaColumn,
-                dataCompraColumn, fabricanteColumn, valorColumn, condicoesColumn, observacaoColumn);
-
-        ObservableList<Computador> computadores = FXCollections.observableArrayList();
-
-        ResultSet resultSet = (ResultSet) (ResultSet) databaseManager.getAllComputadores();
+        ResultSet resultSet = databaseManager.getAllComputadores();
         if (resultSet != null) {
             try {
                 while (resultSet.next()) {
@@ -71,15 +75,17 @@ public class ListaComputadoresFX extends Application {
                     String setor = resultSet.getString("setor");
                     String descricao = resultSet.getString("descricao");
                     boolean garantia = resultSet.getBoolean("garantia");
-                    String validadeGarantia = resultSet.getString("validade_garantia");
-                    String dataCompra = resultSet.getString("data_compra");
+                    LocalDate validadeGarantia = resultSet.getDate("validade_garantia").toLocalDate();
+                    // Faça o mesmo para outras datas: dataCompra, ultimaManutencao, previsaoProximaManutencao
                     String fabricante = resultSet.getString("fabricante");
                     double valor = resultSet.getDouble("valor");
                     String condicoes = resultSet.getString("condicoes");
                     String observacao = resultSet.getString("observacao");
+                    LocalDate ultimaManutencao = resultSet.getDate("ultima_manutencao").toLocalDate();
+                    LocalDate previsaoProximaManutencao = resultSet.getDate("previsao_proxima_manutencao").toLocalDate();
 
-                    Computador computador = new Computador(id, setor, descricao, garantia, validadeGarantia,
-                            dataCompra, fabricante, valor, condicoes, observacao);
+                    Computer computador = new Computer(id, setor, descricao, garantia, validadeGarantia,
+                            fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
                     computadores.add(computador);
                 }
             } catch (SQLException e) {
@@ -102,5 +108,8 @@ public class ListaComputadoresFX extends Application {
     }
 
     public void exibirListaComputadores(Statement statement) {
+    }
+
+    public void show() {
     }
 }

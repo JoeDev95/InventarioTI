@@ -5,11 +5,14 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 
 
 public class DatabaseManager {
-    private static final String DATABASE_URL = "jdbc:sqlite:/home/joe/inventario.db";
+    private static final String DATABASE_URL = "jdbc:postgresql://localhost:5432/postgres?user=postgres&password=123";
+
 
 
     private Connection connection;
@@ -45,7 +48,7 @@ public class DatabaseManager {
         }
     }
 
-    public void insertComputador(Computador computador) {
+    public void insertComputador(Computer computador) {
         String sql = "INSERT INTO computers (id, setor, descricao, garantia, validade_garantia, data_compra, " +
                 "fabricante, valor, condicoes, observacao, ultima_manutencao, previsao_proxima_manutencao) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -54,8 +57,6 @@ public class DatabaseManager {
             statement.setString(1, computador.getSetor());
             statement.setString(2, computador.getDescricao());
             statement.setBoolean(3, computador.isGarantia());
-            statement.setString(4, computador.getValidadeGarantia());
-            statement.setString(5, computador.getDataCompra());
             statement.setString(6, computador.getFabricante());
             statement.setDouble(7, computador.getValor());
             statement.setString(8, computador.getCondicoes());
