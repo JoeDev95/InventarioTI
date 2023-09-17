@@ -18,7 +18,7 @@ public class Computer {
             int id,
             String setor,
             String descricao,
-            LocalDate dataCompra, String fabricante,
+            String fabricante,
             double valor,
             String condicoes,
             String observacao,
@@ -65,11 +65,12 @@ public class Computer {
         return observacao;
     }
 
-    public LocalDate getUltimaManutencao() {
-        return ultimaManutencao;
+    public String getUltimaManutencao() {
+
+        return null;
     }
 
-    public LocalDate getPrevisaoProximaManutencao() {
-        return previsaoProximaManutencao;
+    public String getPrevisaoProximaManutencao(){
+        return null;
     }
 }

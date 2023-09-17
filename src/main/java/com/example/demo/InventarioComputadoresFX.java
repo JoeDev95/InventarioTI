@@ -46,7 +46,7 @@ public class InventarioComputadoresFX extends Application {
 
         vbox.getChildren().addAll(createComputerForm());
 
-        // Botões para Salvar
+
         HBox buttonsBox = new HBox(10);
         buttonsBox.setPadding(new Insets(10, 0, 0, 0));
 
@@ -134,10 +134,9 @@ public class InventarioComputadoresFX extends Application {
 
     private Computer getComputerFromForm() {
         try {
-            int id = 0; // Você pode definir o ID adequadamente se necessário
+            int id = 0;
             String setor = setorTextField.getText();
             String descricao = descricaoTextField.getText();
-            LocalDate dataCompra = dataCompraDatePicker.getValue();
             String fabricante = fabricanteChoiceBox.getValue();
             double valor = Double.parseDouble(valorTextField.getText());
             String condicoes = condicoesTextArea.getText();
@@ -145,7 +144,7 @@ public class InventarioComputadoresFX extends Application {
             LocalDate ultimaManutencao = ultimaManutencaoDatePicker.getValue();
             LocalDate previsaoProximaManutencao = previsaoProximaManutencaoDatePicker.getValue();
 
-            return new Computer(id, setor, descricao,  dataCompra, fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
+            return new Computer(id, setor, descricao,  fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
         } catch (Exception e) {
             System.out.println("Erro ao obter os dados do formulário: " + e.getMessage());
             return null;
@@ -153,10 +152,9 @@ public class InventarioComputadoresFX extends Application {
     }
 
     private void clearFormFields() {
-        // Limpar os campos do formulário após a inserção bem-sucedida no banco de dados
+        // Limpa os campos do formulário após a inserção bem-sucedida no banco de dados
         setorTextField.clear();
         descricaoTextField.clear();
-        dataCompraDatePicker.setValue(null);
         fabricanteChoiceBox.setValue("Filial 1");
         valorTextField.clear();
         condicoesTextArea.clear();

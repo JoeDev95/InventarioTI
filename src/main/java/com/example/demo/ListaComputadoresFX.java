@@ -74,9 +74,6 @@ public class ListaComputadoresFX extends Application {
                     int id = resultSet.getInt("id");
                     String setor = resultSet.getString("setor");
                     String descricao = resultSet.getString("descricao");
-                    boolean garantia = resultSet.getBoolean("garantia");
-                    LocalDate validadeGarantia = resultSet.getDate("validade_garantia").toLocalDate();
-
                     String fabricante = resultSet.getString("fabricante");
                     double valor = resultSet.getDouble("valor");
                     String condicoes = resultSet.getString("condicoes");
@@ -85,9 +82,8 @@ public class ListaComputadoresFX extends Application {
                     LocalDate previsaoProximaManutencao = resultSet.getDate("previsao_proxima_manutencao").toLocalDate();
 
 
-                    LocalDate dataCompra = null;
-                    Computer computador = new Computer(id, setor, descricao,
-                            dataCompra, fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
+
+                    Computer computador = new Computer(id, setor, descricao, fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
                     computadores.add(computador);
                 }
             } catch (SQLException e) {
