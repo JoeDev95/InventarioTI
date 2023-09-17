@@ -6,9 +6,7 @@ public class Computer {
     private int id;
     private String setor;
     private String descricao;
-    private boolean garantia;
-    private LocalDate validadeGarantia;
-    private LocalDate dataCompra;
+
     private String fabricante;
     private double valor;
     private String condicoes;
@@ -20,9 +18,7 @@ public class Computer {
             int id,
             String setor,
             String descricao,
-            boolean garantia,
-            LocalDate validadeGarantia,
-            String fabricante,
+            LocalDate dataCompra, String fabricante,
             double valor,
             String condicoes,
             String observacao,
@@ -32,9 +28,6 @@ public class Computer {
         this.id = id;
         this.setor = setor;
         this.descricao = descricao;
-        this.garantia = garantia;
-        this.validadeGarantia = validadeGarantia;
-        this.dataCompra = dataCompra;
         this.fabricante = fabricante;
         this.valor = valor;
         this.condicoes = condicoes;
@@ -54,11 +47,6 @@ public class Computer {
     public String getDescricao() {
         return descricao;
     }
-
-    public boolean isGarantia() {
-        return garantia;
-    }
-
 
 
     public String getFabricante() {
