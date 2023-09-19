@@ -74,7 +74,6 @@ public class ListaComputadoresFX extends Application {
                     int id = resultSet.getInt("id");
                     String setor = resultSet.getString("setor");
                     String descricao = resultSet.getString("descricao");
-                    String fabricante = resultSet.getString("fabricante");
                     double valor = resultSet.getDouble("valor");
                     String condicoes = resultSet.getString("condicoes");
                     String observacao = resultSet.getString("observacao");
@@ -83,7 +82,7 @@ public class ListaComputadoresFX extends Application {
 
 
 
-                    Computer computador = new Computer(id, setor, descricao, fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
+                    Computer computador = new Computer(id, setor, descricao, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
                     computadores.add(computador);
                 }
             } catch (SQLException e) {

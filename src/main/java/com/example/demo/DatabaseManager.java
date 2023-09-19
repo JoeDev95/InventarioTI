@@ -49,25 +49,26 @@ public class DatabaseManager {
     }
 
     public void insertComputer(Computer computador) {
-        String sql = "INSERT INTO computers (id, setor, descricao, " +
-                "fabricante, valor, condicoes, observacao, ultima_manutencao, previsao_proxima_manutencao) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    String sql = "INSERT INTO computers (setor, descricao, fabricante, valor, condicoes, observacao, ultima_manutencao, previsao_proxima_manutencao) " +
+                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, computador.getSetor());
-            statement.setString(2, computador.getDescricao());
-            statement.setString(3, computador.getFabricante());
-            statement.setDouble(4, computador.getValor());
-            statement.setString(5, computador.getCondicoes());
-            statement.setString(6, computador.getObservacao());
-            statement.setString(7, computador.getPrevisaoProximaManutencao());
-            statement.setString(8,computador.getUltimaManutencao());
+    try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        statement.setString(1, computador.getSetor());
+        statement.setString(2, computador.getDescricao());
+        statement.setString(3, computador.getFabricante());
+        statement.setDouble(4, computador.getValor());
+        statement.setString(5, computador.getCondicoes());
+        statement.setString(6, computador.getObservacao());
+        statement.setObject(7, computador.getUltimaManutencao());
+        statement.setObject(8, computador.getPrevisaoProximaManutencao());
 
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println("Erro ao inserir o bem no banco de dados: " + e.getMessage());
-        }
+        statement.executeUpdate();
+    } catch (SQLException e) {
+        System.out.println("Erro ao inserir o bem no banco de dados: " + e.getMessage());
     }
+}
+
+
 
     public ResultSet getAllComputadores() {
         String sql = "SELECT * FROM computers";

@@ -137,14 +137,13 @@ public class InventarioComputadoresFX extends Application {
             int id = 0;
             String setor = setorTextField.getText();
             String descricao = descricaoTextField.getText();
-            String fabricante = fabricanteChoiceBox.getValue();
             double valor = Double.parseDouble(valorTextField.getText());
             String condicoes = condicoesTextArea.getText();
             String observacao = observacaoTextArea.getText();
             LocalDate ultimaManutencao = ultimaManutencaoDatePicker.getValue();
             LocalDate previsaoProximaManutencao = previsaoProximaManutencaoDatePicker.getValue();
 
-            return new Computer(id, setor, descricao,  fabricante, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
+            return new Computer(id, setor, descricao, valor, condicoes, observacao, ultimaManutencao, previsaoProximaManutencao);
         } catch (Exception e) {
             System.out.println("Erro ao obter os dados do formulário: " + e.getMessage());
             return null;

@@ -6,8 +6,6 @@ public class Computer {
     private int id;
     private String setor;
     private String descricao;
-
-    private String fabricante;
     private double valor;
     private String condicoes;
     private String observacao;
@@ -18,7 +16,6 @@ public class Computer {
             int id,
             String setor,
             String descricao,
-            String fabricante,
             double valor,
             String condicoes,
             String observacao,
@@ -28,7 +25,6 @@ public class Computer {
         this.id = id;
         this.setor = setor;
         this.descricao = descricao;
-        this.fabricante = fabricante;
         this.valor = valor;
         this.condicoes = condicoes;
         this.observacao = observacao;
@@ -49,10 +45,6 @@ public class Computer {
     }
 
 
-    public String getFabricante() {
-        return fabricante;
-    }
-
     public double getValor() {
         return valor;
     }
@@ -65,12 +57,15 @@ public class Computer {
         return observacao;
     }
 
-    public String getUltimaManutencao() {
-
-        return null;
+    public LocalDate getUltimaManutencao() {
+        return ultimaManutencao;
     }
 
-    public String getPrevisaoProximaManutencao(){
+    public LocalDate getPrevisaoProximaManutencao() {
+        return previsaoProximaManutencao;
+    }
+
+    public String getFabricante() {
         return null;
     }
 }
